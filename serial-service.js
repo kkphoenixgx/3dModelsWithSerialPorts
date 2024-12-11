@@ -1,46 +1,49 @@
-const { SerialPort, ReadlineParser } = require('serialport');
+const { SerialPortStream } = require('@serialport/stream');
+const { MockBinding } = require('@serialport/binding-mock');
+const { ReadlineParser } = require('@serialport/parser-readline');
 const yargs = require('yargs');
 
 // Configura os argumentos da linha de comando
 const argv = yargs
     .option('path', {
         alias: 'p',
-        description: 'Caminho para a porta serial',
+        description: 'Caminho para a porta serial simulada',
         type: 'string',
-        demandOption: true,
+        default: '/dev/tty-arduino-sim',
     })
     .option('rate', {
         alias: 'r',
         description: 'Taxa de baud (baudRate)',
         type: 'number',
-        demandOption: true,
+        default: 9600,
     })
     .help()
     .alias('help', 'h')
     .argv;
 
-// Função para criar a porta serial
+// Configura o mock
+MockBinding.createPort(argv.path, { echo: true, record: true });
+
 function createSerialPort(path, rate) {
-    const port = new SerialPort({
-        path: path,
+    const port = new SerialPortStream({
+        binding: MockBinding, // Usando o MockBinding
+        path,
         baudRate: rate,
     });
 
     const parser = port.pipe(new ReadlineParser({ delimiter: '\n' }));
     addEvents(port, parser);
 
-    console.log("Porta serial criada em:", path, "com baudRate:", rate);
+    console.log("Porta serial simulada criada em:", path, "com baudRate:", rate);
     return port;
 }
 
 // Configura os eventos da porta
 function addEvents(port, parser) {
     port.on('open', () => {
-        console.log(`Conectado à porta: ${port.path}`);
-
-        // Envia um comando ao dispositivo/simulador
+        console.log(`Conectado à porta simulada: ${port.path}`);
         setTimeout(() => {
-            port.write('PING\n');
+            port.write('PING\n'); // Envia um comando simulado
         }, 1000);
     });
 

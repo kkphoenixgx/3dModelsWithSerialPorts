@@ -48,9 +48,9 @@ app.post("/changePosition", (req, res) => {
         collectionAgents[id] = { id, name, x, y };
       } else {
         collectionAgents[id].name = name;
-        collectionAgents[id].x = x;
-        collectionAgents[id].y = y;
-        collectionAgents[id].z = z;
+        collectionAgents[id].x = x===undefined? 0 : x;
+        collectionAgents[id].y = y===undefined? 0 : y;
+        collectionAgents[id].z = z===undefined? 0 : z;
       }
     });
 
